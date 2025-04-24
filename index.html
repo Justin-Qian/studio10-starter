@@ -43,6 +43,49 @@
                 </form>
             </template>
 
+            <form @submit.prevent="createGroupChat($graffitiSession.value)">
+                <fieldset :disabled="creatingChat">
+                    <input
+                        type="text"
+                        v-model="groupChatName"
+                        placeholder="Enter Group Chat Name"
+                        required
+                    />
+                    <input
+                        type="submit"
+                        :value="creatingChat? 'Creating...' : 'Create Group Chat'"
+                    />
+                </fieldset>
+            </form>
+
+            <graffiti-discover
+                v-slot="{ objects: groupChats }"
+                :channels="channels"
+                :schema="{
+                    properties: {
+                        value: {
+                            required: ['activity', 'object'],
+                            properties: {
+                                activity: { const: 'Create' },
+                                object: {
+                                    required: ['type', 'name', 'channel'],
+                                    properties: {
+                                        type: { const: 'Group Chat' }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }"
+            >
+                <ul>
+                    <li v-for="chat in groupChats" :key="chat.url">
+                        <strong>{{ chat.value.object.name }}</strong>
+                        <button @click="joinGroupChat(chat.value.object.channel)">Join</button>
+                    </li>
+                </ul>
+            </graffiti-discover>
+
             <h2>Messages</h2>
 
             <graffiti-discover
